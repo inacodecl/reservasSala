@@ -1,0 +1,7 @@
+body {
+    background-image: url('../image/fondo.jpg'); /* Cambia URL_DE_TU_IMAGEN por la URL o ruta de tu imagen */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed; /* Para que el fondo se mantenga fijo al hacer scroll */
+}

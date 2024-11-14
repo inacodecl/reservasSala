@@ -1,0 +1,73 @@
+{% extends 'myapp/base.html' %}
+
+{% block title %}Calendario Docentes{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    {% for proyecto_data in proyectos_con_horarios %}
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header text-center">
+                <h1 class="text-center my-4">
+                    <i class="bi bi-calendar"></i> Calendario de Reservas
+                </h1>
+            </div>
+            <div class="table-responsive scrollable-calendar">
+                <table class="table table-sm table-bordered text-center align-middle calendar-table">
+                    <!-- Encabezados de días -->
+                    <thead>
+                        <tr class="calendar-header">
+                            <th scope="col">Hora</th>
+                            <th scope="col">Lunes</th>
+                            <th scope="col">Martes</th>
+                            <th scope="col">Miércoles</th>
+                            <th scope="col">Jueves</th>
+                            <th scope="col">Viernes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for horario in proyecto_data.horarios %}
+                            <tr>
+                                <td class="table-secondary calendar-cell">{{ horario.inicio }} - {{ horario.fin }}</td>
+                                {% for reserva in horario.reservas %}
+                                    {% if reserva.reservado %}
+                                        <td class="reserved calendar-cell bg-danger text-white">
+                                            <small>{{ reserva.actividad }}</small><br>
+                                            <small>Lugar: {{ reserva.lugar }}</small><br>
+                                            <small>Inicio: {{ proyecto_data.proyecto.inicio }}</small><br>
+                                            <small>Fin: {{ proyecto_data.proyecto.fin }}</small>
+                                        </td>                                    
+                                    {% else %}
+                                        <td class="calendar-cell"></td>
+                                    {% endif %}
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}
+
+<script>
+    function terminarProyecto(proyectoId) {
+        fetch(`/terminar_proyecto/${proyectoId}/`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}"
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.success);
+                location.reload();  // Recargar la página para actualizar la lista de proyectos
+            } else {
+                alert(data.error || "Error al intentar terminar el proyecto");
+            }
+        })
+        .catch(error => console.error("Error:", error));
+    }
+</script>

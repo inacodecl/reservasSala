@@ -1,0 +1,65 @@
+/* Estilos para el menú lateral (sidebar) */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 250px;
+    background-color: #004d66;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    color: white;
+    z-index: 1000;
+    padding-top: 20px;
+}
+
+/* Enlaces de navegación */
+.navbar-nav .nav-item .nav-link {
+    font-size: 1rem;
+    color: white;
+    padding: 10px 15px;
+    width: 100%;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.navbar-nav .nav-item .nav-link:hover {
+    background-color: #003d4d;
+    color: #ffffff;
+}
+
+/* Contenedor de contenido principal */
+.content {
+    margin-left: 250px; /* Ajusta el margen para que el contenido no se superponga al menú */
+    padding: 20px;
+    transition: margin-left 0.3s ease; /* Suaviza la transición cuando cambia el margen */
+}
+
+/* Para dispositivos móviles */
+@media (max-width: 768px) {
+    .sidebar {
+        position: static;
+        width: 100%;
+        height: auto;
+        padding-top: 10px;
+    }
+
+    .navbar-nav {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .navbar-nav .nav-item .nav-link {
+        font-size: 0.9rem;
+        padding: 8px;
+        text-align: center;
+        border-bottom: none;
+    }
+
+    /* En pantallas pequeñas, el contenido ocupa todo el ancho */
+    .content {
+        margin-left: 0;
+        width: 100%;
+        padding: 10px;
+    }
+}

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inicio de Sesión</title>
+    
+    {% load static %}
+    <link href="{% static 'css/login.css' %}" rel="stylesheet">
+
+    <!-- Tailwind CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="h-screen flex items-center justify-center">
+    <div class="w-full max-w-md bg-white bg-opacity-70 backdrop-blur-md rounded-lg shadow-lg">
+        <div class="bg-red-500 bg-opacity-80 text-white text-center py-4 rounded-t-lg">
+            <h3 class="text-xl font-semibold">Inicio de Sesión</h3>
+        </div>
+        <div class="p-6">
+            <form action="/" method="POST">
+                {% csrf_token %}
+                <div class="mb-4">
+                    <label for="username" class="block text-gray-700 text-sm font-bold mb-2">Correo</label>
+                    <input type="text" id="username" name="username" required class="shadow appearance-none border border-gray-300 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-red-300 bg-white bg-opacity-50">
+                </div>
+                <div class="mb-6">
+                    <label for="password" class="block text-gray-700 text-sm font-bold mb-2">Contraseña</label>
+                    <input type="password" id="password" name="password" required class="shadow appearance-none border border-gray-300 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-red-300 bg-white bg-opacity-50">
+                </div>
+                <div class="flex items-center justify-between">
+                    <button type="submit" class="w-full bg-green-500 bg-opacity-80 hover:bg-green-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-green-300">
+                        Ingresar
+                    </button>
+                </div>
+            </form>
+        </div>
+        <div class="bg-gray-100 bg-opacity-50 text-center py-4 rounded-b-lg">
+            <small class="text-gray-600">¿Olvidaste tu contraseña? <a href="#" class="text-red-500 hover:underline">Recupérala aquí</a></small>
+        </div>
+    </div>
+</body>
+</html>
