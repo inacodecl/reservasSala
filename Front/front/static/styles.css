@@ -1,0 +1,52 @@
+/* Fondo con temática informática */
+body {
+    background: url('https://i.pinimg.com/1200x/61/72/8a/61728a838136b45b03c32fca39ca6f56.jpg') no-repeat center center fixed;
+    background-size: cover;
+    font-family: 'Arial', sans-serif;
+    color: #fff;
+}
+
+/* Estilo del contenedor del formulario */
+.login-card {
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.5);
+}
+
+/* Título */
+h1 {
+    font-size: 2.5rem;
+    font-weight: 600;
+}
+
+/* Botones y campos */
+input, button {
+    border-radius: 10px;
+    font-size: 1.1rem;
+}
+
+/* Ajuste de bordes y sombras para inputs */
+input:focus, button:focus {
+    box-shadow: 0 0 10px rgba(0, 123, 255, 0.8);
+    border-color: #0d6efd;
+}
+
+button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px;
+    transition: all 0.3s ease;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+/* Mensajes de error */
+.alert {
+    margin-top: 10px;
+    padding: 15px;
+    border-radius: 10px;
+}

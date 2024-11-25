@@ -1,0 +1,111 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Usuario - Bienvenida</title>
+    <link href="{% static 'calendario.css' %}" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.js"></script>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            display: flex;
+            height: 100vh;
+        }
+        .sidebar {
+            width: 250px;
+            background-color: #343a40;
+            color: white;
+            padding: 20px;
+        }
+        .sidebar a {
+            color: white;
+            text-decoration: none;
+            display: block;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+        .sidebar a:hover {
+            background-color: #495057;
+        }
+        .content {
+            flex: 1;
+            padding: 20px;
+        }
+        .calendario-container {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h4>Bienvenido, {{ usuario.nombre }}</h4>
+        <a href="#" id="btn-calendario">📅 Calendario</a>
+        <a href="#" id="btn-solicitudes">📋 Solicitudes</a>
+        <a href="{% url 'cerrar_sesion' %}">🚪 Cerrar Sesión</a>
+    </div>
+
+    <div class="content">
+        <h1>Panel de Usuario</h1>
+        <p>Este es el panel principal. Aquí puedes ver tu calendario, gestionar tus solicitudes y mucho más.</p>
+
+        <!-- Contenedor para mostrar el calendario o los datos de proyectos -->
+        {% block title %}Calendario Administradores{% endblock %}
+
+        {% block content %}
+        <div class="container my-4">
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header text-center">
+                    <h3 class="text-center my-4">
+                        <i class="bi bi-calendar"></i> Calendario de Reservas
+                    </h3>
+                </div>
+                <div class="table-responsive scrollable-calendar">
+                    <table class="table table-sm table-bordered text-center align-middle calendar-table">
+                        <!-- Encabezados de días -->
+                        <thead>
+                            <tr class="calendar-header">
+                                <th scope="col">Hora</th>
+                                <th scope="col">Lunes</th>
+                                <th scope="col">Martes</th>
+                                <th scope="col">Miércoles</th>
+                                <th scope="col">Jueves</th>
+                                <th scope="col">Viernes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for horario in horarios %}
+                                <tr>
+                                    <td class="table-secondary calendar-cell">{{ horario.inicio }} - {{ horario.fin }}</td>
+                                    {% for reserva_dia in horario.reservas_dia %}
+                                        <td class="calendar-cell">
+                                            {% for reserva in reserva_dia.reservas %}
+                                                <div class="p-2 {{ reserva.color }} text-white rounded mb-1">
+                                                    <small>{{ reserva.nombre }}</small><br>
+                                                    <small>Lugar: {{ reserva.lugar }}</small><br>
+                                                    <small>Inicio: {{ reserva.inicio }}</small><br>
+                                                    <small>Fin: {{ reserva.fin }}</small>
+                                                </div>
+                                            {% endfor %}
+                                        </td>
+                                    {% endfor %}
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        {% endblock %}
+        
+    </div>
+
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

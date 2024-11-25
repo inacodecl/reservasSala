@@ -1,0 +1,55 @@
+/* Estilos para el calendario */
+.calendar-cell {
+    font-size: 0.75rem; /* Reducir el tamaño de la fuente */
+    padding: 3px; /* Reducir el padding de las celdas */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1rem; /* Ajustar la altura de línea para compacidad */
+}
+
+/* Tabla para el calendario */
+.scrollable-calendar {
+    max-height: 500px; /* Reducir la altura máxima para hacerlo más compacto */
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+.calendar-table {
+    width: 100%;
+    table-layout: fixed; /* Distribuye las columnas uniformemente */
+    font-size: 0.8rem; /* Reducir tamaño global de fuente */
+}
+
+/* Compactar las celdas de los eventos */
+.calendar-cell .p-2 {
+    padding: 2px; /* Reducir padding interno de los eventos */
+    margin-bottom: 2px; /* Reducir el margen inferior entre eventos */
+    font-size: 0.7rem; /* Ajustar el tamaño del texto de los eventos */
+    line-height: 1rem;
+}
+
+/* Ajustes para pantallas pequeñas */
+@media (max-width: 768px) {
+    .container {
+        max-width: 100%;
+        padding-left: 5px;
+        padding-right: 5px;
+    }
+
+    .calendar-cell {
+        font-size: 0.65rem; /* Reducir más el tamaño de fuente */
+        padding: 2px; /* Ajustar padding para pantallas pequeñas */
+    }
+
+    .scrollable-calendar {
+        width: 100%;
+        max-width: 100%;
+        margin: 0 auto;
+        overflow-x: auto;
+        max-height: 300px; /* Reducir la altura en pantallas pequeñas */
+    }
+
+    .calendar-table {
+        font-size: 0.7rem; /* Reducir aún más el tamaño de fuente */
+    }
+}
