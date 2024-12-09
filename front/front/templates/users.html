@@ -1,0 +1,97 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Usuario - Bienvenida</title>
+    <link href="{% static 'calendario.css' %}" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.js"></script>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            display: flex;
+            height: 100vh;
+        }
+        .sidebar {
+            width: 250px;
+            background-color: #343a40;
+            color: white;
+            padding: 20px;
+        }
+        .sidebar a {
+            color: white;
+            text-decoration: none;
+            display: block;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+        .sidebar a:hover {
+            background-color: #495057;
+        }
+        .content {
+            flex: 1;
+            padding: 20px;
+        }
+        .calendario-container {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h4>Bienvenido, {{ usuario.nombre }}</h4>
+        <a href="#calendario" id="btn-calendario">📅 Calendario</a>
+        <a href="#" id="btn-solicitudes">📋 Solicitudes</a>
+        <a href="{% url 'cerrar_sesion' %}">🚪 Cerrar Sesión</a>
+    </div>
+
+    <div class="content">
+        <h1>Panel de Usuario</h1>
+        <p>Este es el panel principal. Aquí puedes ver tu calendario, gestionar tus solicitudes y mucho más.</p>
+        <h3>Solicitudes</h3>
+        <!-- Aquí agregarías la lista de solicitudes -->
+        <div id="solicitudes-container">
+            {% for reserva in reservas %}
+            <div class="reserva">
+                <p>Nombre de la actividad: {{ reserva.nombre }}</p>
+                <p>Estado: {{ reserva.estado }}</p>
+
+                {% if reserva.estado == "en espera" %}
+                <button class="btn btn-success" onclick="actualizarEstado({{ reserva.id }}, 'aceptada')">Aceptar</button>
+                <button class="btn btn-danger" onclick="actualizarEstado({{ reserva.id }}, 'rechazada')">Rechazar</button>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        function actualizarEstado(reservaId, nuevoEstado) {
+            $.ajax({
+                url: `{% url 'actualizar_reserva' 0 %}`.replace('0', reservaId),
+                method: 'POST',
+                data: {
+                    'estado': nuevoEstado,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function(response) {
+                    alert(response.message);
+                    location.reload();  // Recargar la página para ver el cambio de estado
+                },
+                error: function(response) {
+                    alert('Hubo un error al actualizar la reserva.');
+                }
+            });
+        }
+    </script>
+        <!-- Contenedor para mostrar el calendario o los datos de proyectos -->
+       
+
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
