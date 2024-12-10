@@ -1,0 +1,53 @@
+{% load custom_filters %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Calendario</title>
+</head>
+<body>
+    <h1>Calendario de {{ mes_nombre }} {{ fecha_actual.year }}</h1>
+    <p>Hoy es {{ dia_nombre }}</p>
+
+    <h2>Calendario del Mes</h2>
+    <table border="1">
+        <tr>
+            <th>Lunes</th>
+            <th>Martes</th>
+            <th>Miércoles</th>
+            <th>Jueves</th>
+            <th>Viernes</th>
+            <th>Sábado</th>
+            <th>Domingo</th>
+        </tr>
+        {% for semana in semanas %}
+        <tr>
+            {% for dia in semana %}
+                <td>
+                    {{ dia }}
+                    {% if eventos_del_mes|get_item:dia %}
+                        <ul>
+                            {% for evento in eventos_del_mes|get_item:dia %}
+                                <li>
+                                    <strong>{{ evento.nombre }}</strong><br>
+                                    <em>Reservado por: {{ evento.integrantes|join:", " }}</em><br>
+                                    Horarios: 
+                                    {% for dia_reserva, horas in evento.diasReserva.items %}
+                                        {{ dia_reserva }}: {{ horas.rango_horas.inicio }} - {{ horas.rango_horas.fin }}<br>
+                                    {% endfor %}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+
+    {% if not eventos_del_mes %}
+        <p>No hay eventos para este mes.</p>
+    {% endif %}
+</body>
+</html>
