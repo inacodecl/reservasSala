@@ -30,7 +30,7 @@ urlpatterns = [
     path('update_docente/<str:docente_id>/', views.update_docente, name='update_docente'),  # Actualizar docente
     path('deleteDocente/<str:docente_id>/', views.delete_docente, name='delete_docente'),  # Eliminar docente
     #path('create_proyecto/', views.agregar_proyecto, name='agregar_proyecto'),  # Crear proyecto
-    path('read_proyectos/', views.obtener_proyectos, name='obtener_proyecto'),  # Leer proyectos
+    path('api/proyectos/', views.obtener_proyectos, name='obtener_proyectos'),
     #path('update_proyecto/<str:proyecto_id>/', views.update_proyecto, name='update_proyecto'),  # Actualizar proyecto
     #path('deleteproyecto/<str:proyecto_id>/', views.delete_proyecto, name='delete_proyecto'),  # Eliminar proyecto
     path('proyectos/', views.mostrar_proyectos, name='mostrar_proyectos'),
@@ -43,4 +43,5 @@ urlpatterns = [
     path("crear-reserva/", views.crear_reserva, name="crear_reserva"),
     path('cambiar_estado/<str:proyecto_id>/<str:nuevo_estado>/', views.cambiar_estado_proyecto, name='cambiar_estado'),
     path('agregar_usuario/', views.agregar_usuario, name='agregar_usuario'),
-]
+    path('api/calendario', views.obtener_calendario, name='calendario'),
+    ]

@@ -81,15 +81,34 @@
                 width: 100%;
             }
         }
+        .calendar-table {
+            width: 100%;
+            text-align: center;
+            border-collapse: collapse;
+        }
+        .calendar-table th, .calendar-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+        .calendar-table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        .calendar-table td {
+            background-color: #fdfdfe;
+        }
+        .calendar-table td[data-proyecto="true"] {
+            background-color: #d1e7dd;
+        }
     </style>
     
 </head>
 <body>
     <div class="sidebar">
         <h4>Bienvenido, {{ docente.nombre }}</h4>
-        <a href="#calendario">📅 Calendario</a>
-        
-        <a href="#solicitar" id="mostrarFormulario">📋 Solicitar</a> <!-- Añadimos un ID -->
+        <a href="#" data-bs-toggle="modal" data-bs-target="#modalCalendario">📅 Calendario</a>
+        <a href="#" data-bs-toggle="modal" data-bs-target="#modalMisproyectos">📋mis Proyectos</a>       
+        <a href="#" data-bs-toggle="modal" data-bs-target="#modalSolicitud">📋 Crear Reserva</a>  
         <p>
             <strong>Estado:</strong>
             {% if docente.status == 1 %}
@@ -105,59 +124,168 @@
         <h1>Panel de Docente</h1>
         <p>Este es el panel principal. Aquí puedes ver tu calendario, gestionar tus solicitudes y mucho más.</p>
 
-        <!-- Formulario de solicitud -->
-        <div id="solicitar" class="form-section">
-            <form id="reserva-form" method="post" action="{% url 'crear_reserva' %}">
-                {% csrf_token %}
-                <label for="nombre">Nombre de la Actividad:</label>
-                <input type="text" id="nombre" name="nombre" class="form-control mb-3" required>
-
-                <label for="inicio">Fecha de Inicio:</label>
-                <input type="date" id="inicio" name="inicio" class="form-control mb-3" required>
-
-                <label for="fin">Fecha de Fin:</label>
-                <input type="date" id="fin" name="fin" class="form-control mb-3" required>
-
-                <label>Integrantes:</label>
-                <div id="integrantes-container" class="mb-3">
-                    <div class="integrante mb-2">
-                        <input type="text" name="integrantes[][nombre]" placeholder="Nombre" class="form-control mb-1" required>
-                        <input type="email" name="integrantes[][correo]" placeholder="Correo" class="form-control" required>
+        <div class="modal fade" id="modalCalendario" tabindex="-1" aria-labelledby="modalCalendario" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalCalendario">Horario General</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="container">
+                            <h1 class="text-center">Horario General</h1>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Día</th>
+                                        <th>Proyecto</th>
+                                        <th>Inicio</th>
+                                        <th>Fin</th>
+                                        <th>Estado</th>
+                                        <th>Integrantes</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for dia, reservas in calendario.items %}
+                                    <tr>
+                                        <td rowspan="{{ reservas|length }}">{{ dia }}</td>
+                                        {% for reserva in reservas %}
+                                        <tr>
+                                            <td>{{ reserva.proyecto }}</td>
+                                            <td>{{ reserva.inicio }}</td>
+                                            <td>{{ reserva.fin }}</td>
+                                            <td>{{ reserva.estado }}</td>
+                                            <td>
+                                                {% for integrante in reserva.integrantes %}
+                                                    {{ integrante.nombre }} ({{ integrante.correo }})<br>
+                                                {% endfor %}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>                            
+                        </div>
                     </div>
                 </div>
-                <button type="button" class="btn btn-secondary mb-3" onclick="agregarIntegrante()">Agregar Integrante</button>
-
-                <label>Días Reservados:</label>
-                <div id="dias-container" class="mb-3">
-                    <div class="dia mb-2">
-                        <select name="diasReserva[][dia]" class="form-select mb-1" required>
-                            <option value="Lunes">Lunes</option>
-                            <option value="Martes">Martes</option>
-                            <option value="Miercoles">Miércoles</option>
-                            <option value="Jueves">Jueves</option>
-                            <option value="Viernes">Viernes</option>
-                        </select>
-                        <label for="rango" class="form-label">Rango Horario:</label>
-                        <input type="time" name="diasReserva[][rango_inicio]" class="form-control mb-1" required>
-                        <input type="time" name="diasReserva[][rango_fin]" class="form-control" required>
+            </div>
+        </div>        
+          
+    <!-- Modal para Mis Proyectos -->
+    <div class="modal fade" id="modalMisproyectos" tabindex="-1" aria-labelledby="modalMisproyectosLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalMisproyectosLabel">Mis Proyectos</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="container">
+                        <!-- Lista de proyectos -->
+                        <h1>Proyectos de {{ docente.nombre }}</h1>
+                        <ul class="list-group">
+                            {% if proyectos %}
+                                {% for proyecto in proyectos %}
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        {{ proyecto.nombre }}
+                                        <span class="badge bg-primary rounded-pill">{{ proyecto.estado }}</span>
+                                    </li>
+                                {% endfor %}
+                            {% else %}
+                                <li class="list-group-item">No hay proyectos asignados a este docente.</li>
+                            {% endif %}
+                        </ul>                    
                     </div>
                 </div>
-                <button type="button" class="btn btn-secondary mb-3" onclick="agregarDia()">Agregar Día</button>
-
-                <button type="submit" class="btn btn-primary">Enviar Solicitud</button>
-            </form>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
         </div>
     </div>
 
+        <!-- Modal para Solicitud -->
+    <div class="modal fade" id="modalSolicitud" tabindex="-1" aria-labelledby="modalSolicitudLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalSolicitudLabel">Solicitud de Actividad</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="reserva-form" method="post" action="{% url 'crear_reserva' %}">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="nombre" class="form-label">Nombre de la Actividad:</label>
+                            <input type="text" id="nombre" name="nombre" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="inicio" class="form-label">Fecha de Inicio:</label>
+                            <input type="date" id="inicio" name="inicio" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fin" class="form-label">Fecha de Fin:</label>
+                            <input type="date" id="fin" name="fin" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label>Integrantes:</label>
+                            <div id="integrantes-container" class="mb-3">
+                                <div class="integrante mb-2">
+                                    <input type="text" name="integrantes[][nombre]" placeholder="Nombre" class="form-control mb-1" required>
+                                    <input type="email" name="integrantes[][correo]" placeholder="Correo" class="form-control" required>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-secondary mb-3" onclick="agregarIntegrante()">Agregar Integrante</button>
+                        <div class="mb-3">
+                            <label>Días Reservados:</label>
+                            <div id="dias-container" class="mb-3">
+                                <div class="dia mb-2">
+                                    <select name="diasReserva[][dia]" class="form-select mb-1" required>
+                                        <option value="Lunes">Lunes</option>
+                                        <option value="Martes">Martes</option>
+                                        <option value="Miercoles">Miércoles</option>
+                                        <option value="Jueves">Jueves</option>
+                                        <option value="Viernes">Viernes</option>
+                                    </select>
+                                    <label for="rango" class="form-label">Rango Horario:</label>
+                                    <input type="time" name="diasReserva[][rango_inicio]" class="form-control mb-1" required>
+                                    <input type="time" name="diasReserva[][rango_fin]" class="form-control" required>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-secondary mb-3" onclick="agregarDia()">Agregar Día</button>
+                        <button type="submit" class="btn btn-primary">Enviar Solicitud</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
     <script>
+        const btncrearreserva=document.getElementById("mostrarFormulario");
+        const seccionCrearReserva= document.getElementById("solicitar");
+
+        function hideAllSections() {
+            seccionCrearReserva.style.display = "none";
+        }        
         // Mostrar el formulario al hacer clic en el enlace
         document.getElementById("mostrarFormulario").addEventListener("click", function(event) {
             event.preventDefault(); // Evitar el comportamiento predeterminado del enlace
             const formSection = document.getElementById("solicitar");
             formSection.style.display = "block"; // Mostrar el formulario
             formSection.scrollIntoView({ behavior: "smooth" }); // Desplazarse suavemente hacia el formulario
-        });
-
+        });        // Función para mostrar una sección específica
+        function showSection(section) {
+            hideAllSections(); // Ocultar todas las secciones antes de mostrar la seleccionada
+            section.style.display = "block";
+            section.scrollIntoView({ behavior: "smooth" }); // Desplazar hacia la sección visible
+        }
+        
+        btncrearreserva.addEventListener("click",function(event){
+            event.preventDefault(); 
+            showSection(seccionCrearReserva);
+        }); 
         function agregarIntegrante() {
             const container = document.getElementById("integrantes-container");
             const integrante = document.createElement("div");

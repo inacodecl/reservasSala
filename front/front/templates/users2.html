@@ -1,0 +1,199 @@
+https://youtu.be/oXiV3-Ddrgw{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Usuario - Bienvenida</title>
+    <link href="{% static 'css/users.css' %}" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.js"></script>
+    <script src="{% static 'js/users.js' %}" defer></script>
+</head>
+<body>
+    <div class="sidebar">
+        <h4>Bienvenido, {{ usuario.nombre }}</h4>
+        <a href="{% url 'calendario' %}" id="btn-calendario">📅 Calendario</a>
+        <!-- Enlace para mostrar los proyectos que NO están en espera -->
+        <a href="#proyectos_no_en_espera" id="lista_proyectos_no_en_espera">📋 Proyectos</a>
+        <a href="#solicitar" id="mostrarFormulario">📋 crear reserva</a>
+        <!-- Enlace para mostrar los proyectos EN ESPERA -->
+        <a href="#proyectos_en_espera" id="lista_proyectos_en_espera">📋 Solicitudes</a>
+        <a href="#AgregarUsuario" id="AgregarUsuario">➕Agregar(Usuario/Docente)</a>
+
+        <a href="{% url 'cerrar_sesion' %}">🚪 Cerrar Sesión</a>
+    </div>
+
+    <!-- Contenedor para los proyectos que NO están en espera -->
+    <div id="proyectos_no_en_espera" class="content" style="display: none;">
+        <h2>Proyectos</h2>
+        <ul>
+            {% for proyecto in proyectos_no_en_espera %}
+            <li>
+                <p><strong>Nombre:</strong> {{ proyecto.nombre }}</p>
+    
+                {% if proyecto.id_docente and proyecto.nombre_docente %}
+                    <p><strong>ID Docente:</strong> {{ proyecto.id_docente }}</p>
+                    <p><strong>Nombre Docente:</strong> {{ proyecto.nombre_docente }}</p>
+                {% elif proyecto.id_usuario and proyecto.nombre_usuario %}
+                    <p><strong>ID Usuario:</strong> {{ proyecto.id_usuario }}</p>
+                    <p><strong>Nombre Usuario:</strong> {{ proyecto.nombre_usuario }}</p>
+                {% endif %}
+    
+                <p><strong>Estado:</strong> {{ proyecto.estado }}</p>
+                <p><strong>Integrantes:</strong></p>
+                <ul>
+                    {% for integrante in proyecto.integrantes %}
+                    <li>{{ integrante.nombre }} ({{ integrante.correo }})</li>
+                    {% endfor %}
+                </ul>
+    
+                <!-- Botón para actualizar estado a Terminado -->
+                <form action="{% url 'cambiar_estado' proyecto.id 'terminado' %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit">Terminar</button>
+                </form>
+            </li>
+            <hr>
+            {% endfor %}
+        </ul>
+    </div>
+    
+    <div id="calendario-semanal" class="content" style="display: block;">
+        <h2>Calendario Semanal</h2>
+          <table border="1" style="width: 100%; text-align: center;">
+              <thead>
+                  <tr>
+                      <th>Día</th>
+                      <th>Proyectos</th>
+                  </tr>
+              </thead>
+              <tbody id="tabla-calendario">
+                  <!-- Aquí se llenará el calendario dinámicamente -->
+              </tbody>
+          </table>
+    </div>
+    
+    
+    <!-- Contenedor para los proyectos EN ESPERA -->
+    <!-- Contenedor para los proyectos EN ESPERA -->
+    <div id="proyectos_en_espera" class="content" style="display: none;">
+        <h2>Proyectos En Espera</h2>
+        <ul>
+            {% for proyecto in proyectos_en_espera %}
+                <li>
+                    <p><strong>Nombre del Proyecto:</strong> {{ proyecto.nombre }}</p>
+    
+                    {% if proyecto.id_docente and proyecto.nombre_docente %}
+                        <p><strong>ID Docente:</strong> {{ proyecto.id_docente }}</p>
+                        <p><strong>Nombre Docente:</strong> {{ proyecto.nombre_docente }}</p>
+                    {% endif %}
+    
+                    {% if proyecto.id_usuario and proyecto.nombre_usuario %}
+                        <p><strong>ID Usuario:</strong> {{ proyecto.id_usuario }}</p>
+                        <p><strong>Nombre Usuario:</strong> {{ proyecto.nombre_usuario }}</p>
+                    {% endif %}
+    
+                    <p><strong>Estado:</strong> {{ proyecto.estado }}</p>
+                    
+                    <!-- Botones para cambiar el estado -->
+                    <form action="{% url 'cambiar_estado' proyecto.id 'reservado' %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit">Reservar</button>
+                    </form>
+                    <form action="{% url 'cambiar_estado' proyecto.id 'denegado' %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit">Denegar</button>
+                    </form>
+                </li>
+                <hr>
+            {% endfor %}
+        </ul>
+    </div>
+
+
+
+    <!-- Contenedor para Agregar Usuario/Docente -->
+    <div id="agregar_usuario" class="content " style="display: none;">
+        <h2>Agregar Usuario o Docente</h2>
+        <form method="post" action="{% url 'agregar_usuario' %}">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="tipo" class="form-label">Tipo</label>
+                <select class="form-control" id="tipo" name="tipo" required>
+                    <option value="usuario">Usuario</option>
+                    <option value="docente">Docente</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="nombre" class="form-label">Nombre</label>
+                <input type="text" class="form-control" id="nombre" name="nombre" required>
+            </div>
+            <div class="mb-3">
+                <label for="apellido" class="form-label">Apellido</label>
+                <input type="text" class="form-control" id="apellido" name="apellido" required>
+            </div>
+            <div class="mb-3">
+                <label for="correo" class="form-label">Correo</label>
+                <input type="email" class="form-control" id="correo" name="correo" required>
+            </div>
+            <div class="mb-3">
+                <label for="pwd" class="form-label">Contraseña</label>
+                <input type="password" class="form-control" id="pwd" name="pwd" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Guardar</button>
+        </form>
+    </div>
+
+    <!-- Formulario de solicitud para crear reserva  -->
+    <div id="solicitar" class="content" style="display: none;"">
+        <form id="reserva-form" method="post" action="{% url 'crear_reserva' %}">
+            {% csrf_token %}
+            <h2>Solicitud de Actividad</h2>
+            <label for="nombre">Nombre de la Actividad:</label>
+            <input type="text" id="nombre" name="nombre" class="form-control mb-3" required>
+    
+            <label for="inicio">Fecha de Inicio:</label>
+            <input type="date" id="inicio" name="inicio" class="form-control mb-3" required>
+    
+            <label for="fin">Fecha de Fin:</label>
+            <input type="date" id="fin" name="fin" class="form-control mb-3" required>
+    
+            <label>Integrantes:</label>
+            <div id="integrantes-container" class="mb-3">
+                <div class="integrante mb-2">
+                    <input type="text" name="integrantes[][nombre]" placeholder="Nombre" class="form-control mb-1" required>
+                    <input type="email" name="integrantes[][correo]" placeholder="Correo" class="form-control" required>
+                </div>
+            </div>
+            <button type="button" class="btn btn-secondary mb-3" onclick="agregarIntegrante()">Agregar Integrante</button>
+    
+            <label>Días Reservados:</label>
+            <div id="dias-container" class="mb-3">
+                <div class="dia mb-2">
+                    <select name="diasReserva[][dia]" class="form-select mb-1" required>
+                        <option value="Lunes">Lunes</option>
+                        <option value="Martes">Martes</option>
+                        <option value="Miercoles">Miércoles</option>
+                        <option value="Jueves">Jueves</option>
+                        <option value="Viernes">Viernes</option>
+                    </select>
+                    <label for="rango" class="form-label">Rango Horario:</label>
+                    <input type="time" name="diasReserva[][rango_inicio]" class="form-control mb-1" required>
+                    <input type="time" name="diasReserva[][rango_fin]" class="form-control" required>
+                </div>
+            </div>
+            <button type="button" class="btn btn-secondary mb-3" onclick="agregarDia()">Agregar Día</button>
+    
+            <button type="submit" class="btn btn-primary">Enviar Solicitud</button>
+        </form>
+    </div>
+
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

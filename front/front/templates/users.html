@@ -5,224 +5,263 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Usuario - Bienvenida</title>
-    <link href="{% static 'calendario.css' %}" rel="stylesheet">
+    <link href="{% static 'css/users.css' %}" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.js"></script>
-
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            display: flex;
-            height: 100vh;
-            margin: 0;
-            font-family: Arial, sans-serif;
-        }
-    
-        .sidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 250px;
-            height: 100%;
-            background-color: #343a40;
-            color: white;
-            padding: 20px;
-            overflow-y: auto;
-        }
-    
-        .sidebar h4 {
-            margin-bottom: 20px;
-        }
-    
-        .sidebar a {
-            color: white;
-            text-decoration: none;
-            display: block;
-            padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 5px;
-        }
-    
-        .sidebar a:hover {
-            background-color: #495057;
-        }
-    
-        .content {
-            margin-left: 270px; /* Desplazar contenido debido a la sidebar */
-            padding: 20px;
-            width: calc(100% - 270px);
-            overflow-y: auto;
-        }
-    
-        .proyectos-section {
-            margin-top: 20px;
-        }
-    
-        /* Responsivo */
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 200px;
-            }
-    
-            .content {
-                margin-left: 220px;
-                width: calc(100% - 220px);
-            }
-        }
-    
-        @media (max-width: 480px) {
-            body {
-                flex-direction: column;
-            }
-    
-            .sidebar {
-                position: relative;
-                width: 100%;
-                height: auto;
-            }
-    
-            .content {
-                margin-left: 0;
-                width: 100%;
-            }
-        }
-    </style>
-    
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
+    <script src="{% static 'js/users.js' %}" defer></script>
 </head>
 <body>
     <div class="sidebar">
         <h4>Bienvenido, {{ usuario.nombre }}</h4>
-        <a href="#calendario" id="btn-calendario">📅 Calendario</a>
-        <!-- Enlace para mostrar los proyectos que NO están en espera -->
-        <a href="#proyectos_no_en_espera" id="lista_proyectos_no_en_espera">📋 Proyectos</a>
-        <!-- Enlace para mostrar los proyectos EN ESPERA -->
-        <a href="#proyectos_en_espera" id="lista_proyectos_en_espera">📋 Solicitudes</a>
-        <a href="#AgregarUsuario" id="AgregarUsuario">➕Agregar(Usuario/Docente)</a>
-
+        <a href="#" data-bs-toggle="modal" data-bs-target="#modalCalendario">📅 Calendario</a>
+        <a href="#" data-bs-toggle="modal" data-bs-target="#modalProyectos">📋 Proyectos</a>
+        <a href="#" data-bs-toggle="modal" data-bs-target="#modalSolicitud">📋 Crear Reserva</a>
+        <a href="#" data-bs-toggle="modal" data-bs-target="#modalSolicitudes">📋 Solicitudes</a>
+        <a href="#" data-bs-toggle="modal" data-bs-target="#modalAgregarUsuario">➕ Agregar (Usuario/Docente)</a>
         <a href="{% url 'cerrar_sesion' %}">🚪 Cerrar Sesión</a>
     </div>
 
-    <!-- Contenedor para los proyectos que NO están en espera -->
-    <div id="proyectos_no_en_espera" class="content" style="display: none;">
-        <h2>Proyectos</h2>
-        <ul>
-            {% for proyecto in proyectos_no_en_espera %}
-            <li>
-                <p><strong>Nombre:</strong> {{ proyecto.nombre }}</p>
-                <p><strong>ID Docente:</strong> {{ proyecto.id_docente }}</p>
-                <p><strong>Estado:</strong> {{ proyecto.estado }}</p>
-                <p><strong>Integrantes:</strong></p>
-                <ul>
-                    {% for integrante in proyecto.integrantes %}
-                    <li>{{ integrante.nombre }} ({{ integrante.correo }})</li>
+    <!-- Modal Genérico -->
+    <div class="modal fade" id="modalCalendario" tabindex="-1" aria-labelledby="modalCalendarioLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                
+                {% block content %}
+                <div class="container my-4">
+                    {% for proyecto_data in proyectos_con_horarios %}
+                        <div class="card mb-4 shadow-sm">
+                            <div class="card-header text-center">
+                                <h1 class="text-center my-4">
+                                    <i class="bi bi-calendar"></i> Calendario de Reservas
+                                </h1>
+                            </div>
+                            <div class="table-responsive scrollable-calendar">
+                                <table class="table table-sm table-bordered text-center align-middle calendar-table">
+                                    <!-- Encabezados de días -->
+                                    <thead>
+                                        <tr class="calendar-header">
+                                            <th scope="col">Hora</th>
+                                            <th scope="col">Lunes</th>
+                                            <th scope="col">Martes</th>
+                                            <th scope="col">Miércoles</th>
+                                            <th scope="col">Jueves</th>
+                                            <th scope="col">Viernes</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for horario in proyecto_data.horarios %}
+                                            <tr>
+                                                <td class="table-secondary calendar-cell">{{ horario.inicio }} - {{ horario.fin }}</td>
+                                                {% for reserva in horario.reservas %}
+                                                    {% if reserva.reservado %}
+                                                        <td class="reserved calendar-cell bg-danger text-white">
+                                                            <small>{{ reserva.actividad }}</small><br>
+                                                            <small>Lugar: {{ reserva.lugar }}</small><br>
+                                                            <small>Inicio: {{ proyecto_data.proyecto.inicio }}</small><br>
+                                                            <small>Fin: {{ proyecto_data.proyecto.fin }}</small>
+                                                        </td>                                    
+                                                    {% else %}
+                                                        <td class="calendar-cell"></td>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     {% endfor %}
-                </ul>
-            </li>
-            <hr>
-            {% endfor %}
-        </ul>
-    </div>   
-    
-    <!-- Contenedor para los proyectos EN ESPERA -->
-    <div id="proyectos_en_espera" class="content" style="display: none;">
-        <!-- Mostrar los proyectos en espera -->
-        <h2>Proyectos En Espera</h2>
-        <ul>
-            {% for proyecto in proyectos_en_espera %}
-            <li>
-                <p><strong>Nombre:</strong> {{ proyecto.nombre }}</p>
-                <p><strong>ID Docente:</strong> {{ proyecto.id_docente }}</p>
-                <p><strong>Estado:</strong> {{ proyecto.estado }}</p>
-        
-                <!-- Botones para cambiar el estado -->
-                <form action="{% url 'cambiar_estado' proyecto.id 'reservado' %}" method="post">
-                    {% csrf_token %}
-                    <button type="submit">Reservar</button>
-                </form>
-                <form action="{% url 'cambiar_estado' proyecto.id 'denegado' %}" method="post">
-                    {% csrf_token %}
-                    <button type="submit">Denegar</button>
-                </form>                
-            </li>
-            <hr>
-            {% endfor %}
-        </ul>
-    </div> 
-
-    <!-- Contenedor para Agregar Usuario/Docente -->
-    <div id="agregar_usuario" class="content hidden">
-        <h2>Agregar Usuario o Docente</h2>
-        <form method="post" action="{% url 'agregar_usuario' %}">
-            {% csrf_token %}
-            <div class="mb-3">
-                <label for="tipo" class="form-label">Tipo</label>
-                <select class="form-control" id="tipo" name="tipo" required>
-                    <option value="usuario">Usuario</option>
-                    <option value="docente">Docente</option>
-                </select>
+                </div>
+                {% endblock %}
             </div>
-            <div class="mb-3">
-                <label for="nombre" class="form-label">Nombre</label>
-                <input type="text" class="form-control" id="nombre" name="nombre" required>
-            </div>
-            <div class="mb-3">
-                <label for="apellido" class="form-label">Apellido</label>
-                <input type="text" class="form-control" id="apellido" name="apellido" required>
-            </div>
-            <div class="mb-3">
-                <label for="correo" class="form-label">Correo</label>
-                <input type="email" class="form-control" id="correo" name="correo" required>
-            </div>
-            <div class="mb-3">
-                <label for="pwd" class="form-label">Contraseña</label>
-                <input type="password" class="form-control" id="pwd" name="pwd" required>
-            </div>
-            <button type="submit" class="btn btn-primary">Guardar</button>
-        </form>
+        </div>
     </div>
 
-    <script>
-        // Referencias a los botones y las secciones
-        const btnNoEnEspera = document.getElementById("lista_proyectos_no_en_espera");
-        const btnEnEspera = document.getElementById("lista_proyectos_en_espera");
-        const btnAgregarUsuario = document.getElementById("AgregarUsuario");
-        const proyectosNoEnEspera = document.getElementById("proyectos_no_en_espera");
-        const proyectosEnEspera = document.getElementById("proyectos_en_espera");
-        const seccionAgregarUsuario = document.getElementById("agregar_usuario");
-        
-        // Función para ocultar todas las secciones
-        function hideAllSections() {
-            proyectosNoEnEspera.style.display = "none";
-            proyectosEnEspera.style.display = "none";
-            seccionAgregarUsuario.style.display = "none";
-        }
-        
-        // Función para mostrar una sección específica
-        function showSection(section) {
-            hideAllSections(); // Ocultar todas las secciones antes de mostrar la seleccionada
-            section.style.display = "block";
-            section.scrollIntoView({ behavior: "smooth" }); // Desplazar hacia la sección visible
-        }
-        
-        // Event listeners para alternar entre secciones
-        btnNoEnEspera.addEventListener("click", function (event) {
-            event.preventDefault();
-            showSection(proyectosNoEnEspera);
-        });
-        
-        btnEnEspera.addEventListener("click", function (event) {
-            event.preventDefault();
-            showSection(proyectosEnEspera);
-        });
-        
-        btnAgregarUsuario.addEventListener("click", function (event) {
-            event.preventDefault();
-            showSection(seccionAgregarUsuario);
-        });
+    <!-- Modal para Proyectos -->
+    <div class="modal fade" id="modalProyectos" tabindex="-1" aria-labelledby="modalProyectosLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalProyectosLabel">Proyectos</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <ul>
+                        {% for proyecto in proyectos_no_en_espera %}
+                        <li>
+                            <p><strong>Nombre:</strong> {{ proyecto.nombre }}</p>
+                            {% if proyecto.id_docente and proyecto.nombre_docente %}
+                                <p><strong>ID Docente:</strong> {{ proyecto.id_docente }}</p>
+                                <p><strong>Nombre Docente:</strong> {{ proyecto.nombre_docente }}</p>
+                            {% elif proyecto.id_usuario and proyecto.nombre_usuario %}
+                                <p><strong>ID Usuario:</strong> {{ proyecto.id_usuario }}</p>
+                                <p><strong>Nombre Usuario:</strong> {{ proyecto.nombre_usuario }}</p>
+                            {% endif %}
+                            <p><strong>Estado:</strong> {{ proyecto.estado }}</p>
+                            <p><strong>Integrantes:</strong></p>
+                            <ul>
+                                {% for integrante in proyecto.integrantes %}
+                                <li>{{ integrante.nombre }} ({{ integrante.correo }})</li>
+                                {% endfor %}
+                            </ul>
+                            <form action="{% url 'cambiar_estado' proyecto.id 'terminado' %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-success">Terminar</button>
+                            </form>
+                        </li>
+                        <hr>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    </script>
-  
+    <!-- Modal para Solicitud -->
+    <div class="modal fade" id="modalSolicitud" tabindex="-1" aria-labelledby="modalSolicitudLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalSolicitudLabel">Solicitud de Actividad</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="reserva-form" method="post" action="{% url 'crear_reserva' %}">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="nombre" class="form-label">Nombre de la Actividad:</label>
+                            <input type="text" id="nombre" name="nombre" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="inicio" class="form-label">Fecha de Inicio:</label>
+                            <input type="date" id="inicio" name="inicio" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fin" class="form-label">Fecha de Fin:</label>
+                            <input type="date" id="fin" name="fin" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label>Integrantes:</label>
+                            <div id="integrantes-container" class="mb-3">
+                                <div class="integrante mb-2">
+                                    <input type="text" name="integrantes[][nombre]" placeholder="Nombre" class="form-control mb-1" required>
+                                    <input type="email" name="integrantes[][correo]" placeholder="Correo" class="form-control" required>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-secondary mb-3" onclick="agregarIntegrante()">Agregar Integrante</button>
+                        <div class="mb-3">
+                            <label>Días Reservados:</label>
+                            <div id="dias-container" class="mb-3">
+                                <div class="dia mb-2">
+                                    <select name="diasReserva[][dia]" class="form-select mb-1" required>
+                                        <option value="Lunes">Lunes</option>
+                                        <option value="Martes">Martes</option>
+                                        <option value="Miercoles">Miércoles</option>
+                                        <option value="Jueves">Jueves</option>
+                                        <option value="Viernes">Viernes</option>
+                                    </select>
+                                    <label for="rango" class="form-label">Rango Horario:</label>
+                                    <input type="time" name="diasReserva[][rango_inicio]" class="form-control mb-1" required>
+                                    <input type="time" name="diasReserva[][rango_fin]" class="form-control" required>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-secondary mb-3" onclick="agregarDia()">Agregar Día</button>
+                        <button type="submit" class="btn btn-primary">Enviar Solicitud</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Modal para ver las solicitudes de Usuario/Docente -->
+    <div class="modal fade" id="modalSolicitudes" tabindex="-1" aria-labelledby="modalSolicitudesLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalSolicitudesLabel">solicitudes de proyectos</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    
+                    <ul>
+                        {% for proyecto in proyectos_en_espera %}
+                            <li>
+                                <p><strong>Nombre del Proyecto:</strong> {{ proyecto.nombre }}</p>
+                
+                                {% if proyecto.id_docente and proyecto.nombre_docente %}
+                                    <p><strong>ID Docente:</strong> {{ proyecto.id_docente }}</p>
+                                    <p><strong>Nombre Docente:</strong> {{ proyecto.nombre_docente }}</p>
+                                {% endif %}
+                
+                                {% if proyecto.id_usuario and proyecto.nombre_usuario %}
+                                    <p><strong>ID Usuario:</strong> {{ proyecto.id_usuario }}</p>
+                                    <p><strong>Nombre Usuario:</strong> {{ proyecto.nombre_usuario }}</p>
+                                {% endif %}
+                
+                                <p><strong>Estado:</strong> {{ proyecto.estado }}</p>
+                                
+                                <!-- Botones para cambiar el estado -->
+                                <form action="{% url 'cambiar_estado' proyecto.id 'reservado' %}" method="post">
+                                    {% csrf_token %}
+                                    <button type="submit">Reservar</button>
+                                </form>
+                                <form action="{% url 'cambiar_estado' proyecto.id 'denegado' %}" method="post">
+                                    {% csrf_token %}
+                                    <button type="submit">Denegar</button>
+                                </form>
+                            </li>
+                            <hr>
+                        {% endfor %}
+                    </ul>
+                </div>    
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Agregar Usuario/Docente -->
+    <div class="modal fade" id="modalAgregarUsuario" tabindex="-1" aria-labelledby="modalAgregarUsuarioLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalAgregarUsuarioLabel">Agregar Usuario o Docente</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="post" action="{% url 'agregar_usuario' %}">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="tipo" class="form-label">Tipo</label>
+                            <select class="form-control" id="tipo" name="tipo" required>
+                                <option value="usuario">Usuario</option>
+                                <option value="docente">Docente</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="nombre" class="form-label">Nombre</label>
+                            <input type="text" class="form-control" id="nombre" name="nombre" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="apellido" class="form-label">Apellido</label>
+                            <input type="text" class="form-control" id="apellido" name="apellido" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="correo" class="form-label">Correo</label>
+                            <input type="email" class="form-control" id="correo" name="correo" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="pwd" class="form-label">Contraseña</label>
+                            <input type="password" class="form-control" id="pwd" name="pwd" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Guardar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
